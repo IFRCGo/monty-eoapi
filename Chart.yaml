@@ -1,0 +1,5 @@
+apiVersion: v2
+name: monty-eopi
+description: Montandon eoAPI super app. This chart deploys the eoAPI application and its support services.
+type: application
+version: 0.1.0

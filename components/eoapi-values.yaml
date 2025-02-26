@@ -1,0 +1,35 @@
+{{ $ingressAnnotations := merge  .Values.components.eoapi.ingress.annotations .Values.global.ingress.annotations }}
+
+ingress:
+  enabled: {{ .Values.components.eoapi.ingress.enabled }}
+  host: {{ .Values.components.eoapi.ingress.hostname}}.{{ .Values.global.ingress.hostDomain }}
+  tls:
+    enabled: {{ .Values.components.eoapi.ingress.tls.enabled }}
+    secretName: {{ .Values.components.eoapi.ingress.tls.secretName }}
+    certManager: {{ .Values.components.eoapi.ingress.tls.certManager }}
+    certManagerIssuer: {{ .Values.components.eoapi.ingress.tls.certManagerIssuer }}
+    certManagerEmail: {{ .Values.components.eoapi.ingress.tls.certManagerEmail }}
+  {{- with $ingressAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+pgstacBootstrap:
+  settings:
+    envVars:
+      LOAD_FIXTURES: "0"
+      RUN_FOREVER: "1"
+postgrescluster:
+  pgBouncerReplicas: {{ .Values.components.eoapi.postgrescluster.bouncer-replicas }}
+  instances:
+  - name: eoapi
+    replicas: {{ .Values.components.eoapi.postgrescluster.data-node.replicas }}
+    dataVolumeClaimSpec:
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: {{ .Values.components.eoapi.postgrescluster.data-node.resources.requests.storage }}
+          cpu: {{ .Values.components.eoapi.postgrescluster.data-node.resources.requests.cpu }}
+          memory: {{ .Values.components.eoapi.postgrescluster.data-node.resources.requests.memory }}
+
+

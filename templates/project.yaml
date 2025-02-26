@@ -1,0 +1,33 @@
+# This is the ArgoCD project definition for the monty-eoapi application
+# It is used to define the project that the application belongs to
+# It is also used to define the source repositories that the application can use
+# The project is also used to define the cluster resource whitelist and namespace resource whitelist
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{ include "monty-eoapi.fullname" . }}
+  namespace: argocd
+  # Finalizer that ensures that project is not deleted until it is not referenced by any application
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    release-name: {{.Release.Name}}
+spec:
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: Namespace
+  - group: '*'
+    kind: ClusterRoleBinding
+  description: {{ .Chart.Description }} [{{.Release.Name}}]
+  destinations:
+  - name: in-cluster
+    namespace: {{ include "monty-eoapi.fullname" . }}
+    server: {{ .Values.apps.destination.server }}
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  orphanedResources:
+    warn: false
+  sourceRepos:
+  - https://devseed.com/eoapi-k8s/
+status: {}

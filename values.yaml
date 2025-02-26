@@ -1,0 +1,76 @@
+# This is the values.yaml file for the monty-eoapi superchart
+# It is used to define the values that are passed to the subcharts
+# It does not contain all the values that are passed to the subcharts
+# Only the values that are useful for the Monty eoAPI application
+
+# Service account settings
+serviceAccount:
+  create: true
+  # name: ""
+  imagePullSecrets: {}
+  annotations: {}
+
+# Application settings
+apps: # Deployment Settings for all apps (components)
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monty-eoapi
+  # Sync policy 
+  syncPolicy:
+    automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: true # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+      allowEmpty: true # Allows deleting all application resources during automatic syncing ( false by default ).
+    syncOptions:     # Sync options which modifies sync behavior
+    - Validate=false # disables resource validation (equivalent to 'kubectl apply --validate=false') ( true by default ).
+    - CreateNamespace=true # Namespace Auto-Creation ensures that namespace specified as the application destination exists in the destination cluster.
+    - PrunePropagationPolicy=foreground # Supported policies are background, foreground and orphan.
+    - PruneLast=true # Allow the ability for resource pruning to happen as a final, implicit wave of a sync operation
+    # The retry feature is available since v1.7
+    retry:
+      limit: 5 # number of failed sync attempt retries; unlimited number of attempts if less than 0
+      backoff:
+        duration: 5s # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+        factor: 2 # a factor to multiply the base duration after each failed retry
+        maxDuration: 3m # the maximum amount of time allowed for the backoff strategy
+
+# Global settings shared among all components
+global:
+  ingress:
+    hostDomain: ifrc.org
+    annotations: {}
+  secrets: {}
+
+# Component specific settings
+components:
+
+  # eoAPI component settings
+  eoapi:
+    enabled: true
+    chart:
+      repository: https://devseed.com/eoapi-k8s/
+      chart: eoapi
+      version: 0.5.0
+    replicaCount: 3
+    ingress:
+      enabled: true
+      hostname: monty-eoapi
+      tls:
+        enabled: true
+        secretName: monty-eoapi-tls
+        certManager: false
+        certManagerIssuer: letsencrypt-prod
+        certManagerEmail: ""
+    postgrescluster:
+      bouncer-replicas: 1
+      data-node:
+        replicas: 1
+        resources:
+          requests:
+            storage: 100Gi
+            cpu: 1024m
+            memory: 3048Mi
+
+  # TODO : activate the support for auto-scaling
+  eoapi-support:
+    enabled: false

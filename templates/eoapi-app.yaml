@@ -1,0 +1,24 @@
+{{- if .Values.components.eoapi.enabled -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ include "monty-eoapi.fullname" . }}
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: {{ include "monty-eoapi.fullname" . }}
+    server: {{ .Values.apps.destination.server }}
+  project: {{ include "monty-eoapi.fullname" . }}
+  source:
+    helm:
+      valueFiles:
+      - values.yaml
+      values: |- {{ tpl (.Files.Get "components/eoapi-values.yaml") . | nindent 8  }}
+    repoURL: {{ .Values.components.eoapi.chart.repository }}
+    chart: {{ .Values.components.eoapi.chart.chart }}
+    targetRevision: {{ .Values.components.eoapi.chart.version }}
+  syncPolicy:
+    {{- toYaml .Values.apps.syncPolicy | nindent 4 }}
+{{- end }}

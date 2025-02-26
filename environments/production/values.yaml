@@ -1,0 +1,35 @@
+# This file contains the values that are specific to the staging environment
+
+# Global settings shared among all components
+global:
+  ingress:
+    hostDomain: ifrc.org
+    annotations: {}
+  secrets: {}
+
+# Component specific settings
+components:
+
+  # eoAPI component settings
+  eoapi:
+    enabled: true
+    chart:
+      repository: https://devseed.com/eoapi-k8s/
+      chart: eoapi
+      version: 0.5.0
+    ingress:
+      enabled: true
+      hostname: montandon-eoapi
+      tls:
+        enabled: true
+        secretName: montandon-eoapi-tls
+    postgrescluster:
+      bouncer-replicas: 1
+      data-node:
+        replicas: 1
+        resources:
+          requests:
+            storage: 600Gi
+            cpu: 1024m
+            memory: 3048Mi
+            

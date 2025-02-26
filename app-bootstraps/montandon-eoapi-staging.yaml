@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: montandon-eoapi-staging
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/IFRCGo/monty-eoapi.git
+    targetRevision: main
+    helm:
+      valueFiles:
+        - environment/staging/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: montandon-eoapi-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
